@@ -5,7 +5,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { useTasks } from '../hooks/useTasks';
 import { useProjects } from '../hooks/useProjects';
 import DroppableColumn from '../components/board/DroppableColumn';
-import TaskCard from '../components/task/TaskCard';
+import DraggableTaskCard from '../components/task/DraggableTaskCard';
 import TaskForm from '../components/task/TaskForm';
 import Button from '../components/common/Button';
 import Select from '../components/common/Select';
@@ -189,10 +189,11 @@ const Board = () => {
 
         <DragOverlay>
           {activeTask ? (
-            <div className="rotate-3 opacity-80">
-              <TaskCard
+            <div className="rotate-6 scale-105 shadow-2xl">
+              <DraggableTaskCard
                 task={activeTask}
-                draggable={false}
+                onEdit={() => {}}
+                onDelete={() => {}}
               />
             </div>
           ) : null}
