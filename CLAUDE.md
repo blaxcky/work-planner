@@ -7,6 +7,8 @@ Hier ist ein ausführlicher Prompt für Claude Code:
 
 Erstelle ein modernes, browserbasiertes Projektmanagement-Tool ähnlich wie Microsoft Planner für den persönlichen Gebrauch. Das Tool soll eine intuitive Kanban-Board-Oberfläche bieten, mit der ich meine Projekte, Aufgaben und Termine effizient verwalten kann.
 
+**WICHTIG: Das Tool MUSS als Progressive Web App (PWA) entwickelt werden!**
+
 ### Kernfunktionen:
 - **Kanban-Board System** mit Drag & Drop Funktionalität
 - **Projekt- und Aufgabenverwaltung** mit verschiedenen Status-Spalten
@@ -15,6 +17,7 @@ Erstelle ein modernes, browserbasiertes Projektmanagement-Tool ähnlich wie Micr
 - **Tagging-System** für bessere Organisation
 - **Suchfunktion** über alle Projekte und Aufgaben
 - **Dunkler/Heller Modus** für bessere Nutzererfahrung
+- **PWA Features**: App-Installation, Offline-Funktionalität, Push-Benachrichtigungen
 
 ### Technische Anforderungen:
 - **Frontend**: React mit TypeScript
@@ -25,6 +28,8 @@ Erstelle ein modernes, browserbasiertes Projektmanagement-Tool ähnlich wie Micr
 - **Drag & Drop**: react-beautiful-dnd oder dnd-kit
 - **Datum/Zeit**: date-fns für Datumsoperationen
 - **Build Tool**: Vite für schnelle Entwicklung
+- **PWA**: Vite PWA Plugin für Service Worker und Web App Manifest
+- **Hosting**: GitHub Pages für kostenlose HTTPS-Bereitstellung
 
 ## Detaillierte Todo-Liste
 
@@ -35,6 +40,8 @@ Erstelle ein modernes, browserbasiertes Projektmanagement-Tool ähnlich wie Micr
 - [ ] IndexedDB Wrapper erstellen mit Dexie.js
 - [ ] Basis-Typen definieren (Project, Task, Tag, etc.)
 - [ ] Router Setup mit React Router
+- [ ] PWA Setup mit Vite PWA Plugin (Service Worker, Web App Manifest)
+- [ ] GitHub Pages Deployment Setup (GitHub Actions)
 
 ### Phase 2: Datenschicht und IndexedDB
 - [ ] IndexedDB Schema definieren:
@@ -118,8 +125,10 @@ Erstelle ein modernes, browserbasiertes Projektmanagement-Tool ähnlich wie Micr
 - [ ] Virtualisierung für lange Listen
 - [ ] IndexedDB Queries optimieren
 - [ ] Lazy Loading implementieren
-- [ ] Service Worker für Offline-Funktionalität
+- [ ] Service Worker für Offline-Funktionalität (bereits durch PWA Setup)
 - [ ] Bundle-Size optimieren
+- [ ] PWA Features testen (Installation, Offline-Modus, Update-Mechanismus)
+- [ ] GitHub Pages Deployment testen und finalisieren
 
 ### Phase 10: Export und Backup
 - [ ] Export zu JSON
@@ -182,5 +191,15 @@ interface Settings {
 - Verwende TypeScript strict mode
 - Schreibe sauberen, kommentierten Code
 - Erstelle eine README.md mit Setup-Anweisungen
+- **PWA Requirements**: 
+  - App muss installierbar sein (Web App Manifest)
+  - Offline-Funktionalität durch Service Worker
+  - Responsive Design für alle Geräte
+  - Schnelle Ladezeiten und Performance
+  - HTTPS-Bereitstellung für PWA Features
+- **GitHub Pages Deployment**:
+  - Vite Base URL für GitHub Pages konfigurieren
+  - GitHub Actions für automatisches Deployment
+  - Korrekte Routing-Konfiguration für SPA
 
 Beginne mit dem Projekt-Setup und arbeite dich systematisch durch die Phasen. Priorität haben die Grundfunktionen (Projekte und Tasks erstellen/verwalten) bevor erweiterte Features implementiert werden.
