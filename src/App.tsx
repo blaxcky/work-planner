@@ -11,6 +11,13 @@ function App() {
   useEffect(() => {
     // Initialize with sample data on first load
     initializeWithSampleData();
+    
+    // GitHub Pages SPA redirect handling
+    const redirect = sessionStorage.redirect;
+    delete sessionStorage.redirect;
+    if (redirect && redirect !== location.href) {
+      history.replaceState(null, '', redirect);
+    }
   }, []);
 
   return (
