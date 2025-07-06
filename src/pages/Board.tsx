@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import { useTasks } from '../hooks/useTasks';
 import { useProjects } from '../hooks/useProjects';
+import DroppableColumn from '../components/board/DroppableColumn';
 import TaskCard from '../components/task/TaskCard';
 import TaskForm from '../components/task/TaskForm';
 import Button from '../components/common/Button';
@@ -13,6 +17,8 @@ const Board = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [newTaskStatus, setNewTaskStatus] = useState<Task['status'] | null>(null);
 
   const filteredTasks = selectedProjectId 
     ? tasks.filter(task => task.projectId === selectedProjectId)
@@ -32,12 +38,18 @@ const Board = () => {
   };
 
   const handleCreateTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const statusToUse = newTaskStatus || taskData.status;
+    const statusTasks = getTasksByStatus(statusToUse);
+    
     await createTask({
       ...taskData,
       projectId: selectedProjectId || taskData.projectId,
-      position: filteredTasks.length
+      status: statusToUse,
+      position: statusTasks.length
     });
+    
     setIsTaskFormOpen(false);
+    setNewTaskStatus(null);
   };
 
   const handleUpdateTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -48,7 +60,69 @@ const Board = () => {
   };
 
   const handleStatusChange = async (taskId: string, newStatus: Task['status']) => {
-    await updateTask(taskId, { status: newStatus });
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    const newStatusTasks = getTasksByStatus(newStatus);
+    await updateTask(taskId, { 
+      status: newStatus,
+      position: newStatusTasks.length
+    });
+  };
+
+  const handleAddTaskToColumn = (status: Task['status']) => {
+    setNewTaskStatus(status);
+    setIsTaskFormOpen(true);
+  };
+
+  // Drag and Drop handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const task = tasks.find(t => t.id === active.id);
+    setActiveTask(task || null);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveTask(null);
+
+    if (!over) return;
+
+    const activeTask = tasks.find(t => t.id === active.id);
+    if (!activeTask) return;
+
+    const overId = over.id as string;
+    const overData = over.data.current;
+
+    // Check if dropping on a column
+    if (overData?.type === 'column') {
+      const newStatus = overData.status as Task['status'];
+      if (activeTask.status !== newStatus) {
+        const newStatusTasks = getTasksByStatus(newStatus);
+        await updateTask(activeTask.id, {
+          status: newStatus,
+          position: newStatusTasks.length
+        });
+      }
+      return;
+    }
+
+    // Check if reordering within the same column
+    const overTask = tasks.find(t => t.id === overId);
+    if (!overTask || activeTask.status !== overTask.status) return;
+
+    const statusTasks = getTasksByStatus(activeTask.status);
+    const oldIndex = statusTasks.findIndex(t => t.id === activeTask.id);
+    const newIndex = statusTasks.findIndex(t => t.id === overId);
+
+    if (oldIndex !== newIndex) {
+      const reorderedTasks = arrayMove(statusTasks, oldIndex, newIndex);
+      
+      // Update positions for all tasks in the column
+      for (let i = 0; i < reorderedTasks.length; i++) {
+        await updateTask(reorderedTasks[i].id, { position: i });
+      }
+    }
   };
 
   const handleEditTask = (task: Task) => {
@@ -89,41 +163,41 @@ const Board = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {columns.map((column) => {
-          const columnTasks = getTasksByStatus(column.status);
-          
-          return (
-            <div key={column.status} className={`${column.bgColor} rounded-lg p-4 min-h-[500px]`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-700">{column.title}</h3>
-                <span className="bg-white text-gray-600 text-sm px-2 py-1 rounded-full">
-                  {columnTasks.length}
-                </span>
-              </div>
-              
-              <div className="space-y-3">
-                {columnTasks.length === 0 ? (
-                  <div className="bg-white bg-opacity-50 rounded-lg p-4 text-center">
-                    <p className="text-sm text-gray-500">Keine Aufgaben</p>
-                  </div>
-                ) : (
-                  columnTasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onEdit={handleEditTask}
-                      onDelete={handleDeleteTask}
-                      onStatusChange={handleStatusChange}
-                      draggable={true}
-                    />
-                  ))
-                )}
-              </div>
+      <DndContext
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {columns.map((column) => {
+            const columnTasks = getTasksByStatus(column.status);
+            
+            return (
+              <DroppableColumn
+                key={column.status}
+                id={column.status}
+                title={column.title}
+                bgColor={column.bgColor}
+                tasks={columnTasks}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                onStatusChange={handleStatusChange}
+                onAddTask={handleAddTaskToColumn}
+              />
+            );
+          })}
+        </div>
+
+        <DragOverlay>
+          {activeTask ? (
+            <div className="rotate-3 opacity-80">
+              <TaskCard
+                task={activeTask}
+                draggable={false}
+              />
             </div>
-          );
-        })}
-      </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Statistics */}
       <div className="mt-8 bg-white rounded-lg shadow p-6">
@@ -155,6 +229,7 @@ const Board = () => {
         onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
         task={editingTask}
         defaultProjectId={selectedProjectId}
+        defaultStatus={newTaskStatus || undefined}
       />
     </div>
   );

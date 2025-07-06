@@ -203,3 +203,8 @@ interface Settings {
   - Korrekte Routing-Konfiguration für SPA
 
 Beginne mit dem Projekt-Setup und arbeite dich systematisch durch die Phasen. Priorität haben die Grundfunktionen (Projekte und Tasks erstellen/verwalten) bevor erweiterte Features implementiert werden.
+```
+
+## Erinnerungen/Notizen
+
+- commite änderungen direkt

@@ -13,10 +13,11 @@ interface TaskFormProps {
   onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
   task?: Task;
   defaultProjectId?: string;
+  defaultStatus?: Task['status'];
   loading?: boolean;
 }
 
-const TaskForm = ({ isOpen, onClose, onSubmit, task, defaultProjectId, loading = false }: TaskFormProps) => {
+const TaskForm = ({ isOpen, onClose, onSubmit, task, defaultProjectId, defaultStatus, loading = false }: TaskFormProps) => {
   const { projects } = useProjects();
   const { tags } = useTags();
   
@@ -50,7 +51,7 @@ const TaskForm = ({ isOpen, onClose, onSubmit, task, defaultProjectId, loading =
         projectId: defaultProjectId || '',
         title: '',
         description: '',
-        status: 'todo',
+        status: defaultStatus || 'todo',
         priority: 'medium',
         dueDate: '',
         tags: [],
@@ -58,7 +59,7 @@ const TaskForm = ({ isOpen, onClose, onSubmit, task, defaultProjectId, loading =
       });
     }
     setErrors({});
-  }, [task, defaultProjectId, isOpen]);
+  }, [task, defaultProjectId, defaultStatus, isOpen]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -100,7 +101,7 @@ const TaskForm = ({ isOpen, onClose, onSubmit, task, defaultProjectId, loading =
       projectId: defaultProjectId || '',
       title: '',
       description: '',
-      status: 'todo',
+      status: defaultStatus || 'todo',
       priority: 'medium',
       dueDate: '',
       tags: [],
