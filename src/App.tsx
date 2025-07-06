@@ -1,13 +1,20 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Board from './pages/Board';
 import Calendar from './pages/Calendar';
 import Projects from './pages/Projects';
+import { initializeWithSampleData } from './utils/seedData';
 
 function App() {
+  useEffect(() => {
+    // Initialize with sample data on first load
+    initializeWithSampleData();
+  }, []);
+
   return (
-    <Router>
+    <Router basename="/work-planner">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
