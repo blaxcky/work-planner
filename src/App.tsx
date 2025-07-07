@@ -5,13 +5,9 @@ import Dashboard from './pages/Dashboard';
 import Board from './pages/Board';
 import Calendar from './pages/Calendar';
 import Projects from './pages/Projects';
-import { initializeWithSampleData } from './utils/seedData';
 
 function App() {
   useEffect(() => {
-    // Initialize with sample data on first load
-    initializeWithSampleData();
-    
     // GitHub Pages SPA redirect handling
     const redirect = sessionStorage.redirect;
     delete sessionStorage.redirect;
